@@ -1,3 +1,40 @@
+/* hide quiz intro screen */
+
 .hidden {
     display: none;
+}
+
+/* header */
+
+header {
+    padding: 60px;
+    padding-top: 35px;
+}
+
+#timer {
+    float: right;
+}
+
+#high-score {
+    float: left;
+}
+
+.header {
+    display: inline-block;
+}
+
+/* card */
+
+#intro {
+    max-width: 600px;
+    margin: auto;
+}
+
+#quiz-div {
+    max-width: 600px;
+    margin: auto;
+}
+
+.container {
+    margin: 60px;
 }
