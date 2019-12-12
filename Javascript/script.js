@@ -3,7 +3,6 @@ $(document).ready(function () {
     // global variables
 
     var quizIntro = $("#intro");
-    var startQuiz = $("#start-quiz");
     var quizCont = $("#quiz");
     var wrongCorrect = $("#wrong-correct");
     var pos = 0;
@@ -15,34 +14,39 @@ $(document).ready(function () {
     var chB = questions[pos].choices[1];
     var chC = questions[pos].choices[2];
     var chD = questions[pos].choices[3];
-    console.log(chA, chB, chC, chD);
+    
+    // create landing screen
 
+    function landingScreen() {
+        quizCont.html($("<h1>Broadway Quiz Challenge</h1>"));
+        quizCont.append($("<p>Try to answer the following Broadway related questions within the time limit. Keep in mind that incorrect answers will penalize your score time by 10 seconds!</p>"));
+        quizCont.append($("<button type=button id=start-quiz>Start Quiz</button>"));
+    }
+    
     // create timer
 
     function createTimer() {
-        var timer = $("#timer");
+        var timer = $("#timer");    
         timer.html("Time: 1:30");
 
-        var interval = setInterval(function timeIt() {
+        interval = setInterval(function () {
             counter++;
             timer.html("Time: " + convertSeconds(timeleft - counter));
             return;
         }, 1000);
-
-        function convertSeconds(s) {
-            var min = Math.floor(s / 60);
-            var sec = s % 60;
-            sec = sec.toString().padStart(2, "0");
-            if (min <= 0 && Number(sec) <= 0) {
-                clearInterval(interval);
-                createScoreForm();
-            } else if (pos > questions.length) {
-                clearInterval(interval);
-            } else {
-                return min + ":" + sec;
-            };
-        };
     }
+
+    function convertSeconds(s) {
+        var min = Math.floor(s / 60);
+        var sec = s % 60;
+        sec = sec.toString().padStart(2, "0");
+        if (timeleft - counter <= 0) {
+            clearInterval(interval);
+            createScoreForm();
+        } else {
+            return min + ":" + sec;
+        };
+    };
 
     // create quiz structure
 
@@ -80,13 +84,24 @@ $(document).ready(function () {
 
     function createHighScorePage(event) {
         quizCont.html($("<h2>High Scores</h2>"));
-    }
+        var name = localStorage.getItem("initial");
+        var highScore = localStorage.getItem("score");
+        quizCont.append($("<p class=high-score>" + name + " - " + highScore + "</p>"));
+        var button1 = $("<button>");
+        var button2 = $("<button>");
+        var goBackButton = button1.attr("id", "go-back");
+        goBackButton.text("Go Back");
+        var clearButton = button2.attr("id", "clear");
+        clearButton.text("Clear High Scores")
+        quizCont.append(goBackButton);
+        quizCont.append(clearButton);
+    };
 
     // store to local storage
 
     function storeVars() {
         var initialEntry = $("#initial");
-        localStorage.setItem("initial", initialEntry.value);
+        localStorage.setItem("initial", initialEntry.val());
         localStorage.setItem("score", score);
     }
 
@@ -95,8 +110,8 @@ $(document).ready(function () {
     function buttonID() {
 
         var id = $(this).attr("id");
-        console.log(id)
-        var isCorrect = checkAnswer(id)
+        console.log(id);
+        var isCorrect = checkAnswer(id);
 
         if (isCorrect) {
             console.log("Correct");
@@ -108,6 +123,8 @@ $(document).ready(function () {
                     createQuiz(pos);
                 } else {
                     createScoreForm();
+                    clearInterval(interval);
+                    pos = 0;
                 }
             }, 500)
         } else {
@@ -122,18 +139,18 @@ $(document).ready(function () {
     function checkAnswer(id) {
         if (questions[pos].choices[Number(id)] === questions[pos].answer) {
             console.log("CORRECT!");
-            return true
+            return true;
         }
         console.log("INCORRECT!");
-        return false
+        return false;
     };
 
     // call functions
-
+    // landing screen
+    landingScreen();
+    
     // start quiz
-    startQuiz.click(function () {
-        quizIntro.attr("class", "hidden");
-        $("#quiz-div").removeClass("hidden");
+    $("body").on("click", "#start-quiz", function () {
         createTimer();
         createQuiz(pos);
     });
@@ -151,10 +168,24 @@ $(document).ready(function () {
     // view high scores
     $("body").on("click", "#view-high-score", function () {
         event.preventDefault();
+        clearInterval(interval);
         quizIntro.attr("class", "hidden");
         wrongCorrect.attr("class", "hidden");
         $("#quiz-div").removeClass("hidden");
         createHighScorePage();
     });
+
+    // go back to quiz
+    $("body").on("click", "#go-back", function () {
+        event.preventDefault();
+        landingScreen();
+    });
+
+    // clear button
+    $("body").on("click", "#clear", function () {
+        event.preventDefault();
+        $(".high-score").remove();
+        localStorage.clear();
+    })
 
 });
